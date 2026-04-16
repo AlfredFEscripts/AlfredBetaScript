@@ -3,6 +3,39 @@ local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local TextChatService = game:GetService("TextChatService")
 
+-- 🚫 THE BLACKLIST (Single line, just add names in quotes)
+local Blacklist = {"User1", "User2", "User3"}
+
+-- Check Blacklist
+for _, name in pairs(Blacklist) do
+    if game.Players.LocalPlayer.Name == name then
+        -- Chat Message
+        task.wait(2)
+        local chatMsg = "You are blacklisted ask Owner for permission"
+        pcall(function()
+            if game:GetService("TextChatService").ChatVersion == Enum.ChatVersion.TextChatService then
+                game:GetService("TextChatService").TextChannels.RBXGeneral:SendAsync(chatMsg)
+            else
+                game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(chatMsg, "All")
+            end
+        end)
+        
+        -- Screen Notification (5 Seconds)
+        local sg = Instance.new("ScreenGui", game.Players.LocalPlayer.PlayerGui)
+        local txt = Instance.new("TextLabel", sg)
+        txt.Size = UDim2.new(1, 0, 0.1, 0)
+        txt.Position = UDim2.new(0, 0, 0.45, 0)
+        txt.BackgroundColor3 = Color3.new(0,0,0)
+        txt.BackgroundTransparency = 0.5
+        txt.TextColor3 = Color3.new(1,0,0)
+        txt.TextSize = 25
+        txt.Text = "Ask permission to owner on discord: alfredopasta5042"
+        task.wait(5)
+        sg:Destroy()
+        return 
+    end
+end
+
 -- CONFIGURATION
 local GoogleSheetURL = "https://script.google.com/macros/s/AKfycbzjgwXNtHB50gbWWle93YS8iR2rlX2CHSuOPlCWOXMcEen2SM7GOfpFvBVGmILhBzNA6Q/exec"
 local OwnerUser = "Dadrails912"
