@@ -234,38 +234,80 @@ local function StartKeySystem()
     enter.TextColor3 = Color3.new(1,1,1)
     Instance.new("UICorner", enter)
 
-    enter.MouseButton1Click:Connect(function()
-        local typed = input.Text
+ -- [[ UPDATED KEY SYSTEM LOGIC: DO NOT REMOVE EXISTING UI CODE ]]
+
+enter.MouseButton1Click:Connect(function()
+    local typed = input.Text
+    
+    -- 1. Communicate with your Google Sheet
+    local checkURL = GoogleSheetURL .. "?action=checkKey&key=" .. typed
+    local response = game:HttpGet(checkURL)
+
+    -- 2. NEW: BLACKLIST CHECK
+    if response == "BLACKLISTED" then
+        keyGui:Destroy() -- Closes the key menu
         
-        if typed == PermKey then
-            MyData.Rank = "Permanent"
+        -- Create the Blacklist Screen
+        local bg = Instance.new("Frame", Instance.new("ScreenGui", LocalPlayer.PlayerGui))
+        bg.Parent.Name = "BlacklistUI"
+        bg.Size = UDim2.new(1, 0, 1, 0)
+        bg.BackgroundColor3 = Color3.new(0, 0, 0)
+        bg.ZIndexBehavior = Enum.ZIndexBehavior.Global
+        
+        local txt = Instance.new("TextLabel", bg)
+        txt.Size = UDim2.new(1, 0, 0.1, 0)
+        txt.Position = UDim2.new(0, 0, 0.45, 0)
+        txt.BackgroundTransparency = 1
+        txt.TextColor3 = Color3.new(1, 0, 0)
+        txt.TextSize = 25
+        txt.Font = Enum.Font.SourceSansBold
+        txt.Text = "Ask permission to owner on discord: alfredopasta5042"
+        return
+    end
+
+    -- 3. NEW: GRANT LOGIC (Checks Column E in your Sheet)
+    if response == "PERM" then
+        MyData.Rank = "Permanent"
+        Save() -- Ensure your save function is named 'Save'
+        SystemChat("Permanent Grant Detected!")
+        keyGui:Destroy()
+        LoadHub()
+        return
+    elseif response == "24HR" then
+        MyData.Rank = "Free"
+        MyData.ExpireTime = os.time() + 86400 -- Gives 24 hours
+        Save()
+        SystemChat("24-Hour Grant Detected!")
+        keyGui:Destroy()
+        LoadHub()
+        return
+    elseif response == "EXPIRED" then
+        input.Text = ""
+        input.PlaceholderText = "Grant has expired!"
+        return
+    end
+
+    -- 4. YOUR ORIGINAL KEY LOGIC (Keep this as is)
+    if typed == PermKey then
+        MyData.Rank = "Permanent"
+        Save()
+        keyGui:Destroy()
+        LoadHub()
+    elseif ValidFreeKeys[typed] then
+        if response == "USED" then
+            input.Text = ""
+            input.PlaceholderText = "Key already used!"
+        else
+            MyData.Rank = "Free"
+            MyData.ExpireTime = os.time() + 86400
             Save()
-            LogToSheet("PERM_ACTIVATE")
-            SystemChat("Permanent detected! key system bypassed.")
             keyGui:Destroy()
             LoadHub()
-        elseif ValidFreeKeys[typed] then
-            local checkURL = GoogleSheetURL .. "?action=checkKey&key=" .. typed
-            local status = game:HttpGet(checkURL)
-
-            if status == "USED" then
-                input.Text = ""
-                input.PlaceholderText = "Key already used!"
-            else
-                MyData.Rank = "Free"
-                MyData.ExpireTime = os.time() + 86400 
-                Save()
-                LogToSheet(typed)
-                local timeLeft = GetTimeLeft(MyData.ExpireTime)
-                SystemChat("Welcome Free user! " .. timeLeft .. " is left for free access.")
-                keyGui:Destroy()
-                LoadHub()
-            end
-        else
-            input.Text = ""
-            input.PlaceholderText = "Invalid Key!"
         end
-    end)
-end
+    else
+        input.Text = ""
+        input.PlaceholderText = "Invalid Key!"
+    end
+end)
 
 StartKeySystem()
