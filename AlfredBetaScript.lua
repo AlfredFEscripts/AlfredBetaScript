@@ -294,7 +294,7 @@ enter.MouseButton1Click:Connect(function()
     else
         input.Text = ""
         input.PlaceholderText = "Invalid Key!"
-    end
-end)
-
+            end
+        end
+    end) 
 StartKeySystem()
