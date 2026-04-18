@@ -294,7 +294,7 @@ enter.MouseButton1Click:Connect(function()
     else
         input.Text = ""
         input.PlaceholderText = "Invalid Key!"
-            end
-        end
-    end) 
+    end -- This closes the IF chain
+end) -- This closes the MouseButton1Click function
+
 StartKeySystem()
