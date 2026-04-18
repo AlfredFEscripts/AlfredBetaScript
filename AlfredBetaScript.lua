@@ -233,8 +233,21 @@ local function StartKeySystem()
     enter.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
     enter.TextColor3 = Color3.new(1,1,1)
     Instance.new("UICorner", enter)
-
- -- [[ UPDATED KEY SYSTEM LOGIC: DO NOT REMOVE EXISTING UI CODE ]]
+-- [[ 4. KEY SYSTEM LOGIC ]]
+local PermKey = "AIfredFESCRlPTS"
+local ValidFreeKeys = {
+    ["Alfredfreekey24hr"] = true, ["Alfredfreekey24hr-1432"] = true, ["Alfredfreekey24hr-8854"] = true,
+    ["Alfredfreekey24hr-2109"] = true, ["Alfredfreekey24hr-5647"] = true, ["Alfredfreekey24hr-3321"] = true,
+    ["Alfredfreekey24hr-9087"] = true, ["Alfredfreekey24hr-4456"] = true, ["Alfredfreekey24hr-1122"] = true,
+    ["Alfredfreekey24hr-7765"] = true, ["Alfredfreekey24hr-6543"] = true, ["Alfredfreekey24hr-2980"] = true,
+    ["Alfredfreekey24hr-8172"] = true, ["Alfredfreekey24hr-4498"] = true, ["Alfredfreekey24hr-5001"] = true,
+    ["Alfredfreekey24hr-1987"] = true, ["Alfredfreekey24hr-3344"] = true, ["Alfredfreekey24hr-9981"] = true,
+    ["Alfredfreekey24hr-2233"] = true, ["Alfredfreekey24hr-7070"] = true, ["Alfredfreekey24hr-6611"] = true,
+    ["Alfredfreekey24hr-1029"] = true, ["Alfredfreekey24hr-8542"] = true, ["Alfredfreekey24hr-4114"] = true,
+    ["Alfredfreekey24hr-5522"] = true, ["Alfredfreekey24hr-3698"] = true, ["Alfredfreekey24hr-1209"] = true,
+    ["Alfredfreekey24hr-7431"] = true, ["Alfredfreekey24hr-9876"] = true, ["Alfredfreekey24hr-2580"] = true,
+    ["Alfredfreekey24hr-4040"] = true
+}
 
 enter.MouseButton1Click:Connect(function()
     local typed = input.Text
@@ -243,57 +256,28 @@ enter.MouseButton1Click:Connect(function()
     local checkURL = GoogleSheetURL .. "?action=checkKey&key=" .. typed
     local response = game:HttpGet(checkURL)
 
-    -- 2. NEW: BLACKLIST CHECK
+    -- 2. BLACKLIST CHECK
     if response == "BLACKLISTED" then
-        keyGui:Destroy() -- Closes the key menu
-        
-        -- Create the Blacklist Screen
-        local bg = Instance.new("Frame", Instance.new("ScreenGui", LocalPlayer.PlayerGui))
-        bg.Parent.Name = "BlacklistUI"
+        keyGui:Destroy()
+        local bg = Instance.new("Frame", Instance.new("ScreenGui", game.CoreGui))
         bg.Size = UDim2.new(1, 0, 1, 0)
         bg.BackgroundColor3 = Color3.new(0, 0, 0)
-        bg.ZIndexBehavior = Enum.ZIndexBehavior.Global
-        
         local txt = Instance.new("TextLabel", bg)
         txt.Size = UDim2.new(1, 0, 0.1, 0)
         txt.Position = UDim2.new(0, 0, 0.45, 0)
-        txt.BackgroundTransparency = 1
+        txt.Text = "Ask permission to owner on discord: alfredopasta5042"
         txt.TextColor3 = Color3.new(1, 0, 0)
         txt.TextSize = 25
-        txt.Font = Enum.Font.SourceSansBold
-        txt.Text = "Ask permission to owner on discord: alfredopasta5042"
         return
     end
 
-    -- 3. NEW: GRANT LOGIC (Checks Column E in your Sheet)
-    if response == "PERM" then
-        MyData.Rank = "Permanent"
-        Save() -- Ensure your save function is named 'Save'
-        SystemChat("Permanent Grant Detected!")
-        keyGui:Destroy()
-        LoadHub()
-        return
-    elseif response == "24HR" then
-        MyData.Rank = "Free"
-        MyData.ExpireTime = os.time() + 86400 -- Gives 24 hours
-        Save()
-        SystemChat("24-Hour Grant Detected!")
-        keyGui:Destroy()
-        LoadHub()
-        return
-    elseif response == "EXPIRED" then
-        input.Text = ""
-        input.PlaceholderText = "Grant has expired!"
-        return
-    end
-
-    -- 4. YOUR ORIGINAL KEY LOGIC (Keep this as is)
-    if typed == PermKey then
+    -- 3. GRANT LOGIC (Checks Sheet)
+    if response == "PERM" or typed == PermKey then
         MyData.Rank = "Permanent"
         Save()
         keyGui:Destroy()
         LoadHub()
-    elseif ValidFreeKeys[typed] then
+    elseif response == "24HR" or ValidFreeKeys[typed] then
         if response == "USED" then
             input.Text = ""
             input.PlaceholderText = "Key already used!"
@@ -304,6 +288,9 @@ enter.MouseButton1Click:Connect(function()
             keyGui:Destroy()
             LoadHub()
         end
+    elseif response == "EXPIRED" then
+        input.Text = ""
+        input.PlaceholderText = "Grant has expired!"
     else
         input.Text = ""
         input.PlaceholderText = "Invalid Key!"
